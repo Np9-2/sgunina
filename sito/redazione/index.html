@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studenti Giurisprudenza - Redazione</title>
+<meta name="description" content="TG SG: le notizie e il giornale della redazione di Studenti Giurisprudenza, Università di Napoli Federico II.">
+<link rel="icon" href="/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/stile.css">
+<link rel="stylesheet" href="/assets/redazione.css">
+</head>
+<body>
+
+<header class="testata">
+  <a class="marchio" href="/">
+    <img src="/img/logo.png" alt="">
+    Studenti Giurisprudenza
+  </a>
+  <nav aria-label="Menu principale">
+    <button class="hamburger" type="button" aria-label="Apri il menu" aria-controls="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <ul class="menu" id="menu">
+      <li><a href="/">Home</a></li>
+      <li><a href="/assistente-virtuale-sg">Assistente Virtuale SG</a></li>
+      <li><a href="/rappresentanza">Rappresentanza</a></li>
+      <li class="ha-sottomenu">
+        <button class="apri-sottomenu" type="button" aria-expanded="false" aria-haspopup="true">I anno <svg class="freccia" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <ul class="sottomenu">
+          <li><a href="/i-anno">Accoglienza matricole</a></li>
+          <li><a href="/i-anno/giurisprudenza">Giurisprudenza</a></li>
+          <li class="rientro"><a href="/i-anno/giurisprudenza/cattedra-b-c">Cattedra B-C</a></li>
+          <li class="rientro"><a href="/i-anno/giurisprudenza/cattedra-d-f">Cattedra D-F</a></li>
+          <li class="rientro"><a href="/i-anno/giurisprudenza/cattedra-g-m">Cattedra G-M</a></li>
+          <li class="rientro"><a href="/i-anno/giurisprudenza/cattedra-n-r">Cattedra N-R</a></li>
+          <li class="rientro"><a href="/i-anno/giurisprudenza/cattedra-s-a">Cattedra S-A</a></li>
+          <li><a href="/i-anno/scienze-dei-servizi-giuridici">Scienze dei Servizi Giuridici</a></li>
+        </ul>
+      </li>
+      <li><a href="/convenzioni">Convenzioni</a></li>
+      <li><a href="/materiale-didattico">Materiale didattico</a></li>
+      <li><a href="/redazione" aria-current="page">Redazione</a></li>
+      <li><a href="/contatti">Contatti</a></li>
+      <li><a href="/area-riservata"><b>Area Riservata</b></a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+<h1 class="solo-lettori">Redazione - TG SG</h1>
+
+<section class="studio" aria-label="TG SG in onda">
+
+  <div class="bug">
+    <div class="logo-tg">
+      <div class="logo-tg-box">TG<span>·</span>SG</div>
+      <div class="logo-tg-edizione">Edizione<br><span id="tg-edizione">del giorno</span></div>
+    </div>
+    <div class="in-onda"><span class="punto-rosso" aria-hidden="true"></span>In onda dalla Federico II</div>
+    <div class="orologio" aria-hidden="true"><span id="tg-ora">--:--</span><small id="tg-data"></small></div>
+  </div>
+
+  <div class="palco">
+    <article class="monitor" id="tg-monitor" aria-live="polite">
+      <img class="monitor-foto" id="tg-foto" src="" alt="">
+      <div class="monitor-video" id="tg-video"></div>
+      <div class="tendina" aria-hidden="true"></div>
+      <div class="monitor-numero" id="tg-numero" aria-hidden="true"></div>
+      <button class="monitor-play nascosto" id="tg-play" type="button">▶ Guarda il servizio</button>
+      <div class="sottopancia" id="tg-sottopancia">
+        <div class="sottopancia-etichette"><span class="primo-piano">Primo piano</span><span class="rubrica" id="tg-rubrica"></span></div>
+        <h2 class="sottopancia-titolo"><a id="tg-titolo" href="#servizio"></a></h2>
+        <p class="sottopancia-occhiello" id="tg-occhiello"></p>
+      </div>
+    </article>
+
+    <aside class="scaletta" aria-labelledby="scaletta-titolo">
+      <h2 id="scaletta-titolo">La scaletta di oggi</h2>
+      <ol id="tg-scaletta"></ol>
+    </aside>
+  </div>
+
+  <div class="ticker nascosto" id="tg-ticker">
+    <div class="ticker-etichetta"><span class="punto-bianco" aria-hidden="true"></span>Ultim'ora</div>
+    <div class="ticker-finestra">
+      <div class="ticker-nastro" id="tg-nastro"></div>
+    </div>
+    <button class="ticker-pausa" id="tg-pausa" type="button" aria-label="Ferma la barra delle notizie" aria-pressed="false"><span aria-hidden="true">❚❚</span></button>
+  </div>
+
+</section>
+
+<section class="sezione servizio" id="servizio">
+  <div class="contenitore">
+    <div class="griglia">
+      <div class="colonna c8" id="tg-articolo">
+        <noscript><p class="testo-grande centrato">Per vedere le notizie della redazione attiva JavaScript, oppure seguici su <a href="https://www.instagram.com/sg.unina/">@sg.unina</a>.</p></noscript>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sezione">
+  <div class="contenitore">
+    <hr class="divisore">
+  </div>
+</section>
+
+<section class="sezione" id="edizioni-sezione">
+  <div class="contenitore">
+    <h2 class="titolo-sezione corsivo">Sfoglia le edizioni</h2>
+    <p class="centrato testo-medio">Tutti i numeri del giornale di SG, da leggere e scaricare in PDF.</p>
+    <div class="edizioni" id="tg-edizioni"></div>
+  </div>
+</section>
+
+<div class="spazio" aria-hidden="true"></div>
+</main>
+
+<footer class="piede">
+  SG-StudentiGiurisprudenza<br>
+  <a href="mailto:studentigiurisprudenzasg@gmail.com">studentigiurisprudenzasg@gmail.com</a><br>
+  <a href="https://www.instagram.com/sg.unina/" target="_blank" rel="noopener">@sg.unina</a>
+</footer>
+
+<script src="/assets/sito.js"></script>
+<script src="/redazione/notizie.js"></script>
+<script src="/assets/redazione.js"></script>
+</body>
+</html>

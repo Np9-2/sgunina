@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Pagina segreta (easter egg): i motori di ricerca non la indicizzano.
+     Ci si arriva solo digitando il codice Konami sul sito: ↑ ↑ ↓ ↓ ← → ← → B A -->
+<meta name="robots" content="noindex, nofollow">
+
+<title>SG sta per…</title>
+<link rel="icon" href="/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   PERSONALIZZAZIONE COLORI
+   (testi e significati si cambiano nello script in fondo)
+   ========================================================= */
+:root{
+  --sfondo-centro:#0d4b4f;   /* sfondo, al centro */
+  --sfondo-bordi:#052628;    /* sfondo, ai bordi */
+  --guscio-chiaro:#fbf3df;   /* guscio, parte illuminata */
+  --guscio-scuro:#e2c98f;    /* guscio, parte in ombra */
+  --decoro-verde:#08383b;    /* fasce dell'uovo */
+  --oro:#d4ae5a;             /* zig-zag, puntini, iniziali S e G */
+  --testo:#f9f9f9;           /* scritte */
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  height:100%;
+}
+
+body{
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(8px, 1.8vh, 18px);
+  padding:20px 16px;
+  overflow:hidden;
+  background:radial-gradient(circle at 50% 40%, var(--sfondo-centro) 0%, var(--sfondo-bordi) 72%);
+  color:var(--testo);
+  font-family:"EB Garamond",Georgia,"Times New Roman",serif;
+  text-align:center;
+}
+
+h1{
+  margin:0;
+  font-size:clamp(30px, 5vw, 48px);
+  font-weight:600;
+  letter-spacing:.01em;
+}
+
+h1 em{
+  color:var(--oro);
+  font-style:normal;
+}
+
+
+/* ---------- l'uovo ---------- */
+
+.uovo-btn{
+  margin-top:clamp(36px, 8vh, 70px);   /* spazio per la testa che spunta */
+  padding:0;
+  border:0;
+  background:none;
+  cursor:pointer;
+  border-radius:50% / 60%;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.uovo-btn:focus-visible{
+  outline:3px solid var(--oro);
+  outline-offset:8px;
+}
+
+.uovo{
+  display:block;
+  width:min(60vw, 32vh, 380px);
+  height:auto;
+  overflow:visible;
+  filter:drop-shadow(0 26px 34px rgba(0,0,0,.45));
+  transform-origin:50% 92%;
+  animation:galleggia 4s ease-in-out infinite;
+}
+
+.uovo.dondola{
+  animation:dondola .55s ease-in-out;
+}
+
+@keyframes galleggia{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+}
+
+@keyframes dondola{
+  0%,100%{transform:rotate(0)}
+  25%{transform:rotate(-9deg)}
+  55%{transform:rotate(7deg)}
+  80%{transform:rotate(-3deg)}
+}
+
+/* colori del disegno */
+.luce{stop-color:var(--guscio-chiaro)}
+.ombra{stop-color:var(--guscio-scuro)}
+.fascia{fill:var(--decoro-verde)}
+.oro{fill:var(--oro)}
+.zigzag{fill:none;stroke:var(--oro)}
+
+/* crepe che compaiono un po' alla volta */
+.crepa{
+  fill:none;
+  stroke:#6b5a33;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  opacity:0;
+  transition:opacity .3s ease;
+}
+
+.uovo[data-crepe="1"] .crepa-1,
+.uovo[data-crepe="2"] .crepa-1,
+.uovo[data-crepe="2"] .crepa-2{
+  opacity:1;
+}
+
+/* apertura: la metà di sopra vola via e spunta la testa */
+.meta-sopra{
+  transform-box:view-box;
+  transform-origin:100px 80px;
+  transition:transform .9s cubic-bezier(.2,.8,.3,1), opacity .45s .45s ease;
+}
+
+/* il guscio di sopra schizza in alto a destra e svanisce */
+.uovo.aperto .meta-sopra{
+  transform:translate(130px,-120px) rotate(55deg);
+  opacity:0;
+}
+
+.uovo.aperto .crepa,
+.uovo.aperto .intero{
+  opacity:0;
+}
+
+.testa{
+  transform-box:view-box;
+  transform-origin:100px 160px;
+  transform:translateY(46px) scale(.6);
+  transition:transform .8s .25s cubic-bezier(.3,1.6,.5,1);
+}
+
+.uovo.aperto .testa{
+  transform:translateY(-14px) scale(1);
+}
+
+
+/* ---------- la slot machine delle sigle ---------- */
+
+.significato{
+  min-height:1.25em;
+  margin:0;
+  font-size:clamp(28px, 5.4vw, 46px);
+  font-weight:700;
+  line-height:1.15;
+}
+
+.significato .ini{
+  color:var(--oro);
+}
+
+.significato.gira{
+  animation:gira .45s ease-out;
+}
+
+@keyframes gira{
+  0%{transform:translateY(-60%);opacity:0;filter:blur(6px)}
+  60%{transform:translateY(8%);opacity:1;filter:blur(0)}
+  100%{transform:translateY(0)}
+}
+
+.etichetta{
+  margin:0;
+  min-height:1.3em;
+  font-size:clamp(16px, 2.2vw, 19px);
+  font-style:italic;
+  opacity:.75;
+}
+
+.storico{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:4px 18px;
+  min-height:1.5em;
+  max-width:640px;
+  margin:0;
+  padding:0;
+  list-style:none;
+  font-size:clamp(15px, 2vw, 18px);
+  opacity:.55;
+}
+
+.storico li{
+  text-decoration:line-through;
+  text-decoration-color:rgba(249,249,249,.6);
+}
+
+.azione{
+  margin:0;
+  font-size:clamp(16px, 2.2vw, 19px);
+  opacity:.8;
+}
+
+.ricomincia{
+  padding:8px 20px;
+  border:1px solid rgba(249,249,249,.5);
+  border-radius:999px;
+  background:transparent;
+  color:var(--testo);
+  font:inherit;
+  font-size:17px;
+  cursor:pointer;
+}
+
+.ricomincia:hover{
+  background:rgba(249,249,249,.08);
+}
+
+.firma{
+  margin:6px 0 0;
+  font-size:clamp(15px, 2vw, 17px);
+  opacity:.75;
+}
+
+.firma a{
+  color:var(--oro);
+  font-size:inherit;
+  font-weight:600;
+  opacity:1;
+}
+
+a{
+  color:var(--testo);
+  font-size:16px;
+  text-underline-offset:4px;
+  opacity:.85;
+}
+
+
+/* ---------- coriandoli ---------- */
+
+.coriandolo{
+  position:fixed;
+  top:-20px;
+  width:9px;
+  height:14px;
+  border-radius:2px;
+  pointer-events:none;
+  animation:cade linear forwards;
+}
+
+@keyframes cade{
+  to{transform:translate(var(--dx), 110vh) rotate(var(--giro))}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .uovo,
+  .uovo.dondola,
+  .significato.gira{
+    animation:none;
+  }
+  .meta-sopra,
+  .testa{
+    transition:none;
+  }
+}
+</style>
+</head>
+<body>
+
+<h1><em>SG</em> sta per…</h1>
+
+<button class="uovo-btn" type="button" aria-label="Clicca l'uovo per scoprire un nuovo significato di SG">
+  <svg class="uovo" viewBox="0 0 200 260" aria-hidden="true" data-crepe="0">
+    <defs>
+      <radialGradient id="guscio" cx="38%" cy="32%" r="75%">
+        <stop offset="0%" class="luce"/>
+        <stop offset="100%" class="ombra"/>
+      </radialGradient>
+
+      <path id="forma-uovo" d="M100 6 C150 6 192 98 192 160 C192 220 150 254 100 254 C50 254 8 220 8 160 C8 98 50 6 100 6 Z"/>
+
+      <clipPath id="dentro-uovo"><use href="#forma-uovo"/></clipPath>
+
+      <!-- la linea di rottura divide l'uovo in due metà -->
+      <clipPath id="clip-sopra">
+        <polygon points="-20,-20 220,-20 220,128 200,128 180,116 160,132 140,114 120,130 100,112 80,130 60,114 40,132 20,116 0,128 -20,128"/>
+      </clipPath>
+      <clipPath id="clip-sotto">
+        <polygon points="-20,128 0,128 20,116 40,132 60,114 80,130 100,112 120,130 140,114 160,132 180,116 200,128 220,128 220,280 -20,280"/>
+      </clipPath>
+
+      <!-- uovo completo, disegnato una volta e usato per le due metà -->
+      <g id="uovo-intero">
+        <use href="#forma-uovo" fill="url(#guscio)"/>
+        <g clip-path="url(#dentro-uovo)">
+          <rect class="fascia" x="0" y="88" width="200" height="12"/>
+          <polyline class="zigzag" points="0,122 12,108 24,122 36,108 48,122 60,108 72,122 84,108 96,122 108,108 120,122 132,108 144,122 156,108 168,122 180,108 192,122 204,108"
+                    stroke-width="5" stroke-linejoin="round"/>
+          <rect class="fascia" x="0" y="134" width="200" height="52"/>
+          <text class="oro" x="100" y="172" text-anchor="middle" font-family="EB Garamond, Georgia, serif" font-size="34" font-weight="700" letter-spacing="3">SG</text>
+          <g class="oro">
+            <circle cx="22" cy="204" r="5"/><circle cx="48" cy="204" r="5"/><circle cx="74" cy="204" r="5"/>
+            <circle cx="100" cy="204" r="5"/><circle cx="126" cy="204" r="5"/><circle cx="152" cy="204" r="5"/>
+            <circle cx="178" cy="204" r="5"/>
+          </g>
+          <rect class="fascia" x="0" y="220" width="200" height="8"/>
+        </g>
+        <ellipse cx="68" cy="70" rx="16" ry="32" fill="#fff" opacity=".35" transform="rotate(-22 68 70)"/>
+      </g>
+    </defs>
+
+    <!-- la sorpresa: la testa che esce dall'uovo quando si apre.
+         Per cambiare foto sostituisci il file faccia.webp (PNG/WebP con sfondo trasparente). -->
+    <g class="testa">
+      <image href="faccia.webp" x="33" y="-41" width="133" height="190"/>
+      <!-- tocco da avvocato, appoggiato sui capelli e un po' inclinato -->
+      <g transform="rotate(-10 100 -2)">
+        <polygon points="62,-2 100,-16 138,-2 100,12" fill="#1c1c1c"/>
+        <rect x="87" y="0" width="26" height="11" fill="#1c1c1c"/>
+        <line x1="138" y1="-2" x2="142" y2="17" stroke="var(--oro)" stroke-width="2.5"/>
+        <circle cx="142" cy="19" r="3.5" fill="var(--oro)"/>
+      </g>
+    </g>
+
+    <!-- metà di sotto (davanti al mento: si vede solo la testa che spunta) -->
+    <use href="#uovo-intero" clip-path="url(#clip-sotto)"/>
+
+    <!-- metà di sopra (vola via all'apertura) -->
+    <g class="meta-sopra">
+      <use href="#uovo-intero" clip-path="url(#clip-sopra)"/>
+    </g>
+
+    <!-- uovo intero sopra le due metà finché è chiuso: nasconde la giuntura -->
+    <use class="intero" href="#uovo-intero"/>
+
+    <!-- crepe -->
+    <polyline class="crepa crepa-1" points="58,116 66,126 61,134 70,142"/>
+    <polyline class="crepa crepa-1" points="142,114 134,123 140,131"/>
+    <polyline class="crepa crepa-2" points="100,112 96,100 104,92 99,82"/>
+    <polyline class="crepa crepa-2" points="20,117 30,108 26,99"/>
+    <polyline class="crepa crepa-2" points="178,117 170,106 176,98"/>
+  </svg>
+</button>
+
+<p class="etichetta" id="etichetta">&nbsp;</p>
+<p class="significato" id="significato" aria-live="polite"></p>
+<ul class="storico" id="storico"></ul>
+<p class="azione" id="azione">Clicca l'uovo</p>
+
+<p class="firma">Uovo covato da <a id="nome-autore" target="_blank" rel="noopener"></a></p>
+<a href="/">← Torna al sito</a>
+
+<script>
+/* =========================================================
+   PERSONALIZZAZIONE
+   ========================================================= */
+
+/* chi ha covato l'uovo (compare in fondo alla pagina) */
+const NOME_AUTORE = 'Giuseppe Baccari';
+
+/* dove porta il clic sul nome */
+const LINK_AUTORE = 'https://www.instagram.com/giuseppe_baccari/';
+
+/* i significati che escono a ogni clic: [parola con la S, parola con la G] */
+const SIGNIFICATI = [
+  ['Sbobinature', 'Gratis'],
+  ['Sfogliatelle', 'Garantite'],
+  ['Sentenza', 'Garantita'],
+  ['Sessione', 'Gestita'],
+  ['Spritz', 'Gratis'],
+  ['Senato', 'Gallinaceo'],
+  ['Sottolineatori', 'Gialli'],
+  ['Silenzio,', 'Giudice!'],
+  ['Saggi', 'Giuristi'],
+  ['Sempre', 'Geniali'],
+  ['Sonno', 'Garantito'],
+  ['Super', 'Gallina'],
+  ['Sorpresa', 'Gigante']
+];
+
+/* il significato "vero", svelato quando l'uovo si apre */
+const SIGNIFICATO_VERO = ['Studenti', 'Giurisprudenza'];
+
+/* quanti clic servono per aprire l'uovo */
+const CLIC_PER_APRIRE = 7;
+
+
+/* =========================================================
+   FUNZIONAMENTO (non serve modificarlo)
+   ========================================================= */
+
+const pulsante = document.querySelector('.uovo-btn');
+const uovo = document.querySelector('.uovo');
+const etichetta = document.getElementById('etichetta');
+const significato = document.getElementById('significato');
+const storico = document.getElementById('storico');
+const azione = document.getElementById('azione');
+
+const autore = document.getElementById('nome-autore');
+autore.textContent = NOME_AUTORE;
+autore.href = LINK_AUTORE;
+
+let clic = 0;
+let corrente = SIGNIFICATO_VERO;
+let mazzo = [];
+
+function htmlSigla(coppia){
+  return coppia.map(function(parola){
+    const i = parola.search(/[SG]/);
+    return parola.slice(0, i) + '<span class="ini">' + parola.charAt(i) + '</span>' + parola.slice(i + 1);
+  }).join(' ');
+}
+
+function mostra(coppia){
+  significato.classList.remove('gira');
+  void significato.offsetWidth;
+  significato.innerHTML = htmlSigla(coppia);
+  significato.classList.add('gira');
+}
+
+function aggiungiAlloStorico(coppia){
+  const li = document.createElement('li');
+  li.textContent = coppia.join(' ');
+  storico.prepend(li);
+  while(storico.children.length > 3){
+    storico.lastElementChild.remove();
+  }
+}
+
+/* pesca i significati senza ripetizioni finché non sono finiti */
+function prossimo(){
+  if(!mazzo.length){
+    mazzo = SIGNIFICATI.slice().sort(function(){ return Math.random() - .5; });
+  }
+  return mazzo.pop();
+}
+
+function dondola(){
+  uovo.classList.remove('dondola');
+  void uovo.getBoundingClientRect();
+  uovo.classList.add('dondola');
+}
+
+function coriandoli(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colori = ['#d4ae5a', '#f9f9f9', '#2c8f8f', '#ffd54a', '#e2c98f'];
+  for(let i = 0; i < 90; i++){
+    const c = document.createElement('span');
+    c.className = 'coriandolo';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colori[i % colori.length];
+    c.style.setProperty('--dx', (Math.random() * 160 - 80) + 'px');
+    c.style.setProperty('--giro', (Math.random() * 900 - 450) + 'deg');
+    c.style.animationDuration = (2.2 + Math.random() * 1.8) + 's';
+    c.style.animationDelay = (Math.random() * .6) + 's';
+    document.body.appendChild(c);
+    setTimeout(function(){ c.remove(); }, 5000);
+  }
+}
+
+function apri(){
+  uovo.classList.add('aperto');
+  aggiungiAlloStorico(corrente);
+  corrente = SIGNIFICATO_VERO;
+  etichetta.textContent = 'Il vero significato è sempre stato uno:';
+  mostra(SIGNIFICATO_VERO);
+  azione.innerHTML = '';
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'ricomincia';
+  b.textContent = 'Ricomincia';
+  b.addEventListener('click', ricomincia);
+  azione.appendChild(b);
+  coriandoli();
+}
+
+function ricomincia(){
+  clic = 0;
+  uovo.classList.remove('aperto');
+  uovo.dataset.crepe = '0';
+  storico.innerHTML = '';
+  etichetta.innerHTML = '&nbsp;';
+  corrente = SIGNIFICATO_VERO;
+  mostra(SIGNIFICATO_VERO);
+  azione.textContent = 'Clicca l\'uovo';
+}
+
+pulsante.addEventListener('click', function(){
+
+  if(uovo.classList.contains('aperto')) return;
+
+  clic++;
+  dondola();
+
+  if(clic >= CLIC_PER_APRIRE){
+    apri();
+    return;
+  }
+
+  aggiungiAlloStorico(corrente);
+  corrente = prossimo();
+  mostra(corrente);
+
+  /* crepe progressive e messaggi di incoraggiamento */
+  const avanzamento = clic / CLIC_PER_APRIRE;
+  uovo.dataset.crepe = avanzamento >= .7 ? '2' : avanzamento >= .4 ? '1' : '0';
+  etichetta.textContent = 'oppure…';
+  azione.textContent = avanzamento >= .7 ? 'Si sta aprendo…' : avanzamento >= .4 ? 'Si sente qualcosa dentro…' : 'Ancora!';
+});
+
+uovo.addEventListener('animationend', function(e){
+  if(e.animationName === 'dondola'){
+    uovo.classList.remove('dondola');
+  }
+});
+
+/* all'inizio: il significato "ufficiale", che al primo clic finisce barrato */
+mostra(SIGNIFICATO_VERO);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,3 @@
+# Pagina segreta (easter egg): i motori di ricerca non devono indicizzarla
+/uovo/*
+  X-Robots-Tag: noindex, nofollow

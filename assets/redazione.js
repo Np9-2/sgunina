@@ -1,16 +1,14 @@
 /* =========================================================
    STUDENTI GIURISPRUDENZA - pagina Redazione (TG SG)
-   I contenuti stanno in /redazione/notizie.js
+   Gli articoli arrivano dall'Area Riservata (PDF caricati
+   dai redattori). Impostazioni in /redazione/notizie.js
    ========================================================= */
 
 (function(){
 
-  const dati = window.REDAZIONE || {};
-  const servizi = dati.servizi || [];
-  const ultimora = dati.ultimora || [];
-  const edizioni = dati.edizioni || [];
+  const config = window.REDAZIONE || {};
 
-  /* ogni quanti secondi il TG passa da solo al servizio successivo */
+  /* ogni quanti secondi il TG passa da solo all'articolo successivo */
   const SECONDI_PER_SERVIZIO = 9;
 
   const menoMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -22,25 +20,17 @@
     return String(n).padStart(2, '0');
   }
 
-  /* "2026-10-25" -> Date (ora locale) */
-  function leggiData(testo){
-    const parti = String(testo || '').split('-').map(Number);
-    if(parti.length !== 3 || parti.some(isNaN)) return null;
-    return new Date(parti[0], parti[1] - 1, parti[2]);
-  }
-
-  function dataEstesa(testo){
-    const d = leggiData(testo);
-    return d ? d.getDate() + ' ' + MESI[d.getMonth()] + ' ' + d.getFullYear() : '';
+  function dataEstesa(iso){
+    const d = new Date(iso);
+    return isNaN(d) ? '' : d.getDate() + ' ' + MESI[d.getMonth()] + ' ' + d.getFullYear();
   }
 
   /* "oggi", "ieri" oppure "22 ott" */
-  function dataBreve(testo){
-    const d = leggiData(testo);
-    if(!d) return '';
-    const oggi = new Date();
-    oggi.setHours(0, 0, 0, 0);
-    const giorni = Math.round((oggi - d) / 86400000);
+  function dataBreve(iso){
+    const d = new Date(iso);
+    if(isNaN(d)) return '';
+    const inizio = function(x){ return new Date(x.getFullYear(), x.getMonth(), x.getDate()); };
+    const giorni = Math.round((inizio(new Date()) - inizio(d)) / 86400000);
     if(giorni === 0) return 'oggi';
     if(giorni === 1) return 'ieri';
     return d.getDate() + ' ' + MESI[d.getMonth()].slice(0, 3);
@@ -51,6 +41,32 @@
     if(classe) el.className = classe;
     if(testo != null) el.textContent = testo;
     return el;
+  }
+
+  function link(classe, testo, href, nuovaScheda){
+    const a = crea('a', classe, testo);
+    a.href = href;
+    if(nuovaScheda){
+      a.target = '_blank';
+      a.rel = 'noopener';
+    }
+    return a;
+  }
+
+  /* i PDF stanno su Google Drive: da qui copertina, lettore e download */
+  function daArticolo(a){
+    const id = encodeURIComponent(a.id);
+    return {
+      id: a.id,
+      titolo: a.titolo,
+      data: a.data,
+      inArchivioDal: a.inArchivioDal,
+      rimossoIl: a.rimossoIl,
+      copertina: 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1600',
+      lettore: 'https://drive.google.com/file/d/' + id + '/preview',
+      apri: 'https://drive.google.com/file/d/' + id + '/view',
+      scarica: 'https://drive.google.com/uc?export=download&id=' + id
+    };
   }
 
 
@@ -74,14 +90,16 @@
 
   /* ---------- Barra "Ultim'ora" ---------- */
 
-  if(ultimora.length){
+  function preparaUltimora(frasi){
+    if(!frasi.length) return;
+
     const ticker = $('tg-ticker');
     const nastro = $('tg-nastro');
     const pausa = $('tg-pausa');
 
     /* le notizie compaiono due volte di fila: così il giro è continuo */
     [false, true].forEach(function(copia){
-      ultimora.forEach(function(testo){
+      frasi.forEach(function(testo){
         const voce = crea('span', '', testo);
         if(copia) voce.setAttribute('aria-hidden', 'true');
         nastro.appendChild(voce);
@@ -89,8 +107,7 @@
     });
 
     /* velocità costante, qualunque sia la lunghezza delle notizie */
-    const lettere = ultimora.join('').length;
-    nastro.style.setProperty('--durata', Math.max(20, lettere * 0.2) + 's');
+    nastro.style.setProperty('--durata', Math.max(20, frasi.join('').length * 0.2) + 's');
 
     pausa.addEventListener('click', function(){
       const ferma = ticker.classList.toggle('in-pausa');
@@ -103,119 +120,138 @@
   }
 
 
-  /* ---------- Edizioni del giornale ---------- */
+  /* ---------- Archivio ---------- */
 
-  if(edizioni.length){
-    const griglia = $('tg-edizioni');
+  function preparaArchivio(archivio){
+    if(!archivio.length) return;
 
-    edizioni.forEach(function(ed, i){
-      const link = crea('a', 'edizione');
-      link.href = ed.pdf || '#';
-      link.target = '_blank';
-      link.rel = 'noopener';
+    const griglia = $('tg-archivio');
+
+    archivio.forEach(function(a){
+      const voce = link('edizione', null, a.apri, true);
 
       const copertina = crea('div', 'copertina');
-      if(i === 0) copertina.appendChild(crea('span', 'copertina-nuovo', 'NUOVO'));
-      copertina.appendChild(crea('div', 'copertina-testata', dati.testata || 'TG SG'));
-      copertina.appendChild(crea('div', 'copertina-numero', 'N° ' + ed.numero + ' · ' + (ed.mese || '')));
-      if(ed.copertina){
-        const foto = crea('img', 'copertina-foto');
-        foto.src = ed.copertina;
-        foto.alt = '';
-        foto.loading = 'lazy';
-        copertina.appendChild(foto);
-      }
-      copertina.appendChild(crea('p', 'copertina-titolo', ed.titolo || ''));
+      const foto = crea('img', 'copertina-foto');
+      foto.src = a.copertina;
+      foto.alt = '';
+      foto.loading = 'lazy';
+      foto.addEventListener('error', function(){ foto.classList.add('nascosto'); });
+      copertina.appendChild(foto);
 
-      link.appendChild(copertina);
-      link.appendChild(crea('div', 'edizione-leggi', 'Leggi il numero ' + ed.numero + ' in PDF'));
-      griglia.appendChild(link);
+      voce.appendChild(copertina);
+      voce.appendChild(crea('p', 'copertina-titolo', a.titolo));
+      voce.appendChild(crea('div', 'edizione-leggi', 'Uscito il ' + dataEstesa(a.data)));
+      griglia.appendChild(voce);
     });
-  } else {
-    $('edizioni-sezione').classList.add('nascosto');
+
+    $('archivio-sezione').classList.remove('nascosto');
   }
 
 
-  /* ---------- Servizi: monitor, scaletta e articolo ---------- */
+  /* ---------- TG: monitor, scaletta e articolo ---------- */
 
   const monitor = $('tg-monitor');
   const sottopancia = $('tg-sottopancia');
   const scaletta = $('tg-scaletta');
-  const play = $('tg-play');
-  const video = $('tg-video');
+  const scatola = $('tg-scaletta-box');
+  const palco = document.querySelector('.palco');
 
-  if(!servizi.length){
-    $('tg-titolo').textContent = 'Nessun servizio in onda';
-    $('tg-titolo').removeAttribute('href');
-    document.querySelector('.scaletta').classList.add('nascosto');
-    document.querySelector('.palco').style.gridTemplateColumns = '1fr';
-    $('servizio').classList.add('nascosto');
-    return;
-  }
-
+  let servizi = [];
+  let pulsanti = [];
   let attuale = -1;
   let cambio = null;
 
-  /* link YouTube -> codice del video */
-  function codiceYoutube(link){
-    const trovato = String(link || '').match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/);
-    return trovato ? trovato[1] : null;
+  function messaggioMonitor(titolo){
+    $('tg-etichetta').textContent = 'TG SG';
+    $('tg-titolo').textContent = titolo;
+    $('tg-titolo').removeAttribute('href');
+    scatola.classList.add('nascosto');
+    palco.classList.add('senza-scaletta');
+    $('servizio').classList.add('nascosto');
   }
 
-  const pulsanti = servizi.map(function(s, i){
-    const li = crea('li');
-    const btn = crea('button');
-    btn.type = 'button';
-    btn.appendChild(crea('span', 'scaletta-numero', due(i + 1)));
+  function preparaScaletta(){
+    pulsanti = servizi.map(function(s, i){
+      const li = crea('li');
+      const btn = crea('button');
+      btn.type = 'button';
+      btn.appendChild(crea('span', 'scaletta-numero', due(i + 1)));
 
-    const testi = crea('span');
-    testi.appendChild(crea('b', '', s.titolo));
-    testi.appendChild(crea('small', '', [s.rubrica, dataBreve(s.data)].filter(Boolean).join(' · ')));
-    btn.appendChild(testi);
+      const testi = crea('span');
+      testi.appendChild(crea('b', '', s.titolo));
+      testi.appendChild(crea('small', '', i === 0 ? 'Ultima uscita · ' + dataBreve(s.data) : dataBreve(s.data)));
+      btn.appendChild(testi);
 
-    const barra = crea('span', 'scaletta-avanzamento');
-    barra.setAttribute('aria-hidden', 'true');
-    btn.appendChild(barra);
+      const barra = crea('span', 'scaletta-avanzamento');
+      barra.setAttribute('aria-hidden', 'true');
+      btn.appendChild(barra);
 
-    /* finita la barretta, il TG passa al servizio successivo */
-    barra.addEventListener('animationend', function(){
-      mostra((i + 1) % servizi.length);
+      /* finita la barretta, il TG passa all'articolo successivo */
+      barra.addEventListener('animationend', function(){
+        mostra((i + 1) % servizi.length);
+      });
+
+      btn.addEventListener('click', function(){
+        fermaGiro();
+        mostra(i, true);
+      });
+
+      li.appendChild(btn);
+      scaletta.appendChild(li);
+      return btn;
     });
+  }
 
-    btn.addEventListener('click', function(){
-      fermaGiro();
-      mostra(i, true);
-    });
-
-    li.appendChild(btn);
-    scaletta.appendChild(li);
-    return btn;
-  });
-
-  function scriviArticolo(s){
+  /* sotto il monitor: copertina e pulsanti, oppure il PDF da leggere */
+  function scriviArticolo(s, conLettore){
     const box = $('tg-articolo');
     box.textContent = '';
-    if(s.rubrica) box.appendChild(crea('p', 'servizio-rubrica', s.rubrica));
-    box.appendChild(crea('h2', '', s.titolo));
-    if(s.occhiello) box.appendChild(crea('p', 'servizio-occhiello', s.occhiello));
-    const firma = [s.autore ? 'di ' + s.autore : '', dataEstesa(s.data)].filter(Boolean).join(' · ');
-    if(firma) box.appendChild(crea('p', 'servizio-firma', firma));
-    const testo = crea('div', 'servizio-testo');
-    (s.testo || []).forEach(function(par){
-      testo.appendChild(crea('p', '', par));
-    });
-    box.appendChild(testo);
+
+    const testa = crea('div', 'servizio-testa');
+    testa.appendChild(crea('p', 'servizio-rubrica', 'Scaletta del mese · ' + dataEstesa(s.data)));
+    testa.appendChild(crea('h2', '', s.titolo));
+    box.appendChild(testa);
+
+    const azioni = crea('div', 'servizio-azioni');
+
+    if(conLettore){
+      const cornice = crea('div', 'lettore');
+      const riquadro = document.createElement('iframe');
+      riquadro.src = s.lettore;
+      riquadro.title = 'Articolo: ' + s.titolo;
+      riquadro.loading = 'lazy';
+      riquadro.allow = 'fullscreen';
+      cornice.appendChild(riquadro);
+      box.appendChild(cornice);
+    } else {
+      const leggi = crea('button', 'pulsante', 'LEGGI L\'ARTICOLO');
+      leggi.type = 'button';
+      leggi.addEventListener('click', function(){
+        fermaGiro();
+        scriviArticolo(s, true);
+      });
+      azioni.appendChild(leggi);
+    }
+
+    azioni.appendChild(link('pulsante pulsante-chiaro', 'APRI A SCHERMO INTERO', s.apri, true));
+    azioni.appendChild(link('pulsante pulsante-chiaro', 'SCARICA IL PDF', s.scarica, false));
+    box.appendChild(azioni);
+
+    box.appendChild(crea('p', 'servizio-firma', 'In scaletta fino al ' + dataEstesa(s.inArchivioDal) + ', poi in archivio.'));
   }
 
   function riempiMonitor(i){
     const s = servizi[i];
-    $('tg-foto').src = s.immagine || '';
-    $('tg-numero').textContent = 'Servizio ' + due(i + 1);
-    $('tg-rubrica').textContent = s.rubrica || '';
+    $('tg-foto').classList.remove('nascosto');
+    $('tg-sfondo').classList.remove('nascosto');
+    $('tg-foto').src = s.copertina;
+    $('tg-sfondo').src = s.copertina;
+    $('tg-numero').textContent = 'Articolo ' + due(i + 1);
+    $('tg-etichetta').textContent = i === 0 ? 'Ultima uscita' : 'In scaletta';
+    $('tg-rubrica').textContent = dataBreve(s.data);
     $('tg-titolo').textContent = s.titolo;
-    $('tg-occhiello').textContent = s.occhiello || '';
-    video.textContent = '';
-    play.classList.toggle('nascosto', !codiceYoutube(s.video));
+    $('tg-titolo').href = '#servizio';
+    $('tg-occhiello').textContent = 'Pubblicato il ' + dataEstesa(s.data);
 
     /* fa ripartire l'animazione del titolo */
     sottopancia.classList.remove('entra');
@@ -238,7 +274,8 @@
       }
     });
 
-    scriviArticolo(servizi[i]);
+    /* il PDF si apre subito solo se l'ha scelto chi legge */
+    scriviArticolo(servizi[i], !!daUtente);
 
     if(daUtente){
       history.replaceState(null, '', '#' + servizi[i].id);
@@ -248,7 +285,7 @@
     if(primaVolta || menoMovimento){
       riempiMonitor(i);
     } else {
-      /* la tendina copre il monitor, poi scopre il nuovo servizio */
+      /* la tendina copre il monitor, poi scopre il nuovo articolo */
       monitor.classList.remove('cambia');
       void monitor.offsetWidth;
       monitor.classList.add('cambia');
@@ -256,13 +293,11 @@
     }
   }
 
-  /* chi sceglie un servizio lo vuole leggere: il TG non va più avanti da solo */
+  /* chi sceglie un articolo lo vuole leggere: il TG non va più avanti da solo */
   function fermaGiro(){
-    scaletta.parentElement.classList.add('ferma');
+    scatola.classList.add('ferma');
   }
 
-  const scatola = scaletta.parentElement;
-  const palco = document.querySelector('.palco');
   const motiviPausa = new Set();
 
   function pausa(motivo, attiva){
@@ -275,24 +310,26 @@
   palco.addEventListener('focusin', function(){ pausa('focus', true); });
   palco.addEventListener('focusout', function(){ pausa('focus', false); });
 
-  /* non cambiare servizio mentre si legge l'articolo più in basso */
+  /* non cambiare articolo mentre si legge più in basso */
   if('IntersectionObserver' in window){
     new IntersectionObserver(function(voci){
       pausa('fuori', !voci[0].isIntersecting);
     }, { threshold:.5 }).observe(monitor);
   }
 
-  play.addEventListener('click', function(){
-    const codice = codiceYoutube(servizi[attuale].video);
-    if(!codice) return;
-    fermaGiro();
-    const riquadro = document.createElement('iframe');
-    riquadro.src = 'https://www.youtube-nocookie.com/embed/' + codice + '?autoplay=1&rel=0';
-    riquadro.title = servizi[attuale].titolo;
-    riquadro.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
-    riquadro.allowFullscreen = true;
-    video.appendChild(riquadro);
-    play.classList.add('nascosto');
+  /* su computer la scaletta è alta quanto il monitor e scorre al suo interno */
+  function allineaScaletta(){
+    scatola.style.maxHeight = window.innerWidth > 960 ? monitor.offsetHeight + 'px' : '';
+  }
+
+  if('ResizeObserver' in window){
+    new ResizeObserver(allineaScaletta).observe(monitor);
+  }
+
+  window.addEventListener('resize', allineaScaletta);
+
+  ['tg-foto', 'tg-sfondo'].forEach(function(id){
+    $(id).addEventListener('error', function(){ $(id).classList.add('nascosto'); });
   });
 
   $('tg-titolo').addEventListener('click', fermaGiro);
@@ -300,20 +337,52 @@
 
   /* ---------- Avvio ---------- */
 
-  const richiesto = servizi.findIndex(function(s){
-    return '#' + s.id === decodeURIComponent(location.hash);
-  });
+  function avvia(dati){
+    servizi = (dati.scaletta || []).map(daArticolo);
 
-  document.documentElement.style.setProperty('--durata', SECONDI_PER_SERVIZIO + 's');
+    preparaUltimora(
+      (config.ultimora || []).concat(servizi.slice(0, 8).map(function(s){ return s.titolo; }))
+    );
+    preparaArchivio((dati.archivio || []).map(daArticolo));
 
-  if(richiesto >= 0 || menoMovimento || servizi.length < 2){
-    fermaGiro();
+    if(!servizi.length){
+      messaggioMonitor('Nessun articolo in scaletta questo mese');
+      return;
+    }
+
+    preparaScaletta();
+    allineaScaletta();
+
+    document.documentElement.style.setProperty('--durata', SECONDI_PER_SERVIZIO + 's');
+
+    const richiesto = servizi.findIndex(function(s){
+      return '#' + s.id === location.hash;
+    });
+
+    if(richiesto >= 0 || menoMovimento || servizi.length < 2){
+      fermaGiro();
+    }
+
+    mostra(Math.max(richiesto, 0), richiesto >= 0);
+
+    if(richiesto >= 0){
+      $('servizio').scrollIntoView();
+    }
   }
 
-  mostra(Math.max(richiesto, 0));
-
-  if(richiesto >= 0){
-    $('servizio').scrollIntoView();
+  if(!config.fonte){
+    messaggioMonitor('Redazione non configurata');
+    return;
   }
+
+  fetch(config.fonte)
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(avvia)
+    .catch(function(){
+      messaggioMonitor('Le notizie non sono disponibili in questo momento');
+    });
 
 })();

@@ -179,28 +179,35 @@
   box-shadow:0 30px 60px rgba(0,0,0,.45);
 }
 
-.monitor-foto,
-.monitor-video,
-.monitor-video iframe{
+.palco.senza-scaletta{
+  grid-template-columns:minmax(0,1fr);
+}
+
+/* la prima pagina del PDF: intera al centro, sfocata sullo sfondo */
+.monitor-sfondo,
+.monitor-foto{
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
-  border:0;
+}
+
+.monitor-sfondo{
   object-fit:cover;
+  filter:blur(18px) brightness(.55);
+  transform:scale(1.15);
 }
 
-.monitor-foto[src=""]{
+.monitor-foto{
+  padding:18px 0 0;
+  object-fit:contain;
+  object-position:center top;
+  filter:drop-shadow(0 10px 30px rgba(0,0,0,.5));
+}
+
+.monitor-foto[src=""],
+.monitor-sfondo[src=""]{
   visibility:hidden;
-}
-
-.monitor-video:empty{
-  display:none;
-}
-
-.monitor-video{
-  z-index:5;
-  background:#000;
 }
 
 /* sfumatura scura sotto il titolo */
@@ -224,26 +231,6 @@
   font-size:14px;
   letter-spacing:.1em;
   text-transform:uppercase;
-}
-
-.monitor-play{
-  position:absolute;
-  top:18px;
-  right:18px;
-  z-index:2;
-  padding:8px 16px;
-  border:0;
-  border-radius:4px;
-  background:var(--rosso);
-  color:#fff;
-  font:600 16px/1 var(--tg);
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  cursor:pointer;
-}
-
-.monitor-play:hover{
-  background:#a00c24;
 }
 
 /* tendina blu che passa tra un servizio e l'altro */
@@ -354,11 +341,24 @@
    ========================= */
 
 .scaletta{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
   padding:16px 18px;
   border-top:4px solid var(--blu);
   background:rgba(0,0,0,.25);
   -webkit-backdrop-filter:blur(6px);
   backdrop-filter:blur(6px);
+}
+
+/* con tanti articoli la scaletta scorre al suo interno */
+.scaletta ol{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,.3) transparent;
 }
 
 .scaletta h2{
@@ -372,8 +372,8 @@
 }
 
 .scaletta ol{
-  margin:0;
-  padding:0;
+  margin:0 -18px;
+  padding:0 18px;
   list-style:none;
 }
 
@@ -575,34 +575,57 @@
   font-size:45px;
 }
 
-.servizio-occhiello{
-  font-size:24px;
-  font-style:italic;
-  line-height:1.3;
+.servizio-testa{
+  max-width:820px;
+}
+
+/* il PDF dell'articolo, letto direttamente nella pagina */
+.lettore{
+  height:min(85vh,1000px);
+  margin-top:20px;
+  border:1px solid var(--linea);
+  background:var(--carta);
+  box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.lettore iframe{
+  display:block;
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+.servizio-azioni{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:20px;
+}
+
+.servizio-azioni .pulsante{
+  width:auto;
+  min-width:220px;
+  border:0;
+  font-family:inherit;
+  cursor:pointer;
+}
+
+.pulsante-chiaro{
+  background:#fff;
+  color:var(--verde);
+  box-shadow:inset 0 0 0 1px var(--verde);
+}
+
+.pulsante-chiaro:hover{
+  background:var(--carta);
+  color:var(--verde);
 }
 
 .servizio-firma{
-  padding-bottom:14px;
-  border-bottom:1px solid var(--linea);
+  margin-top:14px;
   color:#555;
   font-size:16px;
-}
-
-.servizio-testo p{
-  margin:0 0 16px;
-  font-size:20px;
-  line-height:1.55;
-  text-align:justify;
-  hyphens:auto;
-}
-
-.servizio-testo p:first-child::first-letter{
-  float:left;
-  padding:6px 10px 0 0;
-  color:var(--verde);
-  font-size:68px;
-  font-weight:700;
-  line-height:.8;
+  font-style:italic;
 }
 
 
@@ -626,7 +649,8 @@
 .copertina{
   position:relative;
   aspect-ratio:3/4;
-  padding:18px;
+  padding:10px;
+  overflow:hidden;
   border:1px solid #ddd;
   background:var(--carta);
   box-shadow:0 10px 25px rgba(0,0,0,.12);
@@ -643,55 +667,35 @@
   outline:none;
 }
 
-.copertina-testata{
-  padding-bottom:6px;
-  border-bottom:2px solid var(--verde);
-  color:var(--verde);
-  font-size:26px;
-  font-weight:700;
-  text-align:center;
-  line-height:1.1;
-}
-
-.copertina-numero{
-  margin:6px 0 12px;
-  color:#555;
-  font-family:var(--tg);
-  font-size:12px;
-  letter-spacing:.12em;
-  text-align:center;
-  text-transform:uppercase;
+/* senza copertina resta il logo SG */
+.copertina::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:url('/img/logo.png') center/40% no-repeat;
+  opacity:.25;
 }
 
 .copertina-foto{
+  position:relative;
   width:100%;
-  height:42%;
+  height:100%;
   object-fit:cover;
-  background:#ccc;
+  object-position:center top;
+  background:#fff;
 }
 
 .copertina-titolo{
-  margin:10px 0 0;
-  font-size:16px;
+  text-align:center;
+  margin:14px 0 0;
+  font-size:18px;
   font-weight:700;
   line-height:1.25;
-}
-
-.copertina-nuovo{
-  position:absolute;
-  top:-10px;
-  right:-10px;
-  padding:4px 10px;
-  background:var(--rosso);
-  color:#fff;
-  font-family:var(--tg);
-  font-size:13px;
-  font-weight:700;
-  letter-spacing:.1em;
+  color:var(--verde);
 }
 
 .edizione-leggi{
-  margin-top:12px;
+  margin-top:4px;
   color:#555;
   font-style:italic;
   text-align:center;
@@ -755,16 +759,19 @@
     flex-direction:column;
   }
 
-  .monitor-foto,
-  .monitor-video{
-    position:relative;
+  .monitor-sfondo,
+  .monitor-foto{
     aspect-ratio:16/9;
     height:auto;
   }
 
-  .monitor-video{
-    position:absolute;
+  .monitor-sfondo{
     inset:0 0 auto;
+  }
+
+  .monitor-foto{
+    position:relative;
+    padding-top:12px;
   }
 
   .monitor::before{
@@ -779,11 +786,6 @@
   .monitor-numero{
     top:12px;
     left:12px;
-  }
-
-  .monitor-play{
-    top:12px;
-    right:12px;
   }
 
   .sottopancia{
@@ -809,7 +811,13 @@
   }
 
   .scaletta{
+    max-height:420px;
     padding:12px 16px;
+  }
+
+  .scaletta ol{
+    margin:0 -16px;
+    padding:0 16px;
   }
 
   .scaletta button{
@@ -844,13 +852,13 @@
     font-size:32px;
   }
 
-  .servizio-occhiello{
-    font-size:20px;
+  .lettore{
+    height:75vh;
   }
 
-  .servizio-testo p{
-    font-size:18px;
-    text-align:left;
+  .servizio-azioni .pulsante{
+    width:100%;
+    min-width:0;
   }
 
   .edizioni{
@@ -858,20 +866,11 @@
   }
 
   .copertina{
-    padding:10px;
-  }
-
-  .copertina-testata{
-    font-size:17px;
-  }
-
-  .copertina-numero{
-    font-size:10px;
-    margin:4px 0 8px;
+    padding:6px;
   }
 
   .copertina-titolo{
-    font-size:14px;
+    font-size:15px;
   }
 }
 

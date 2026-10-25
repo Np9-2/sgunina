@@ -54,28 +54,27 @@
 
   <div class="bug">
     <div class="logo-tg">
-      <div class="logo-tg-box">REDAZIONE<span>·</span>SG</div>
-      <div class="logo-tg-edizione">Edizione<br><span id="tg-edizione">del mese</span></div>
+      <div class="logo-tg-box">TG<span>·</span>SG</div>
+      <div class="logo-tg-edizione">Edizione<br><span id="tg-edizione">del giorno</span></div>
     </div>
-    <div class="in-onda"><span class="punto-rosso" aria-hidden="true"></span>Dalla Federico II</div>
+    <div class="in-onda"><span class="punto-rosso" aria-hidden="true"></span>In onda dalla Federico II</div>
     <div class="orologio" aria-hidden="true"><span id="tg-ora">--:--</span><small id="tg-data"></small></div>
   </div>
 
   <div class="palco">
     <article class="monitor" id="tg-monitor" aria-live="polite">
+      <img class="monitor-sfondo" id="tg-sfondo" src="" alt="">
       <img class="monitor-foto" id="tg-foto" src="" alt="">
-      <div class="monitor-video" id="tg-video"></div>
       <div class="tendina" aria-hidden="true"></div>
       <div class="monitor-numero" id="tg-numero" aria-hidden="true"></div>
-      <button class="monitor-play nascosto" id="tg-play" type="button">▶ Guarda il servizio</button>
       <div class="sottopancia" id="tg-sottopancia">
-        <div class="sottopancia-etichette"><span class="primo-piano">Primo piano</span><span class="rubrica" id="tg-rubrica"></span></div>
-        <h2 class="sottopancia-titolo"><a id="tg-titolo" href="#servizio"></a></h2>
+        <div class="sottopancia-etichette"><span class="primo-piano" id="tg-etichetta">In arrivo</span><span class="rubrica" id="tg-rubrica"></span></div>
+        <h2 class="sottopancia-titolo"><a id="tg-titolo" href="#servizio">Caricamento del TG…</a></h2>
         <p class="sottopancia-occhiello" id="tg-occhiello"></p>
       </div>
     </article>
 
-    <aside class="scaletta" aria-labelledby="scaletta-titolo">
+    <aside class="scaletta" id="tg-scaletta-box" aria-labelledby="scaletta-titolo">
       <h2 id="scaletta-titolo">La scaletta del mese</h2>
       <ol id="tg-scaletta"></ol>
     </aside>
@@ -93,27 +92,27 @@
 
 <section class="sezione servizio" id="servizio">
   <div class="contenitore">
-    <div class="griglia">
-      <div class="colonna c8" id="tg-articolo">
-        <noscript><p class="testo-grande centrato">Per vedere le notizie della redazione attiva JavaScript, oppure seguici su <a href="https://www.instagram.com/sg.unina/">@sg.unina</a>.</p></noscript>
-      </div>
+    <div id="tg-articolo">
+      <noscript><p class="testo-grande centrato">Per vedere le notizie della redazione attiva JavaScript, oppure seguici su <a href="https://www.instagram.com/sg.unina/">@sg.unina</a>.</p></noscript>
     </div>
   </div>
 </section>
 
+<div id="archivio-sezione" class="nascosto">
 <section class="sezione">
   <div class="contenitore">
     <hr class="divisore">
   </div>
 </section>
 
-<section class="sezione" id="edizioni-sezione">
+<section class="sezione">
   <div class="contenitore">
-    <h2 class="titolo-sezione corsivo">Sfoglia le edizioni</h2>
-    <p class="centrato testo-medio">Tutti i numeri del giornale di SG, da leggere e scaricare in PDF.</p>
-    <div class="edizioni" id="tg-edizioni"></div>
+    <h2 class="titolo-sezione corsivo">Archivio</h2>
+    <p class="centrato testo-medio">Gli articoli usciti dalla scaletta restano qui per altri 30 giorni.</p>
+    <div class="edizioni" id="tg-archivio"></div>
   </div>
 </section>
+</div>
 
 <div class="spazio" aria-hidden="true"></div>
 </main>

@@ -13,7 +13,7 @@
 window.REDAZIONE = {
 
   /* nome del giornale, scritto sulle copertine */
-  testata: "TG SG",
+  testata: "REDAZIONE SG",
 
 
   /* ---------- Barra "Ultim'ora" che scorre ----------

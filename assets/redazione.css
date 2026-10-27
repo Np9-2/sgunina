@@ -210,6 +210,14 @@
   visibility:hidden;
 }
 
+/* copertina della categoria: la foto riempie tutto il monitor */
+.monitor.con-categoria .monitor-foto{
+  padding:0;
+  object-fit:cover;
+  object-position:center;
+  filter:none;
+}
+
 /* sfumatura scura sotto il titolo */
 .monitor::before{
   content:"";

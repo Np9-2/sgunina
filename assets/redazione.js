@@ -14,6 +14,8 @@
   const menoMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = function(id){ return document.getElementById(id); };
 
+  const CARTELLA_COPERTINE = config.copertine || '/img/redazione/';
+
   const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
 
   function due(n){
@@ -43,6 +45,30 @@
     return el;
   }
 
+  /* mostra la copertina; se l'immagine della categoria non c'è, ripiega sulla prima pagina del PDF */
+  function mettiCopertina(img, s){
+    img.classList.remove('nascosto');
+    img.dataset.riserva = s.copertina === s.primaPagina ? '' : s.primaPagina;
+    img.src = s.copertina;
+  }
+
+  /* da collegare all'evento "error" dell'immagine; vale true se ha ripiegato sul PDF */
+  function copertinaMancante(img){
+    const riserva = img.dataset.riserva;
+    img.dataset.riserva = '';
+    if(riserva){
+      img.src = riserva;
+      return true;
+    }
+    img.classList.add('nascosto');
+    return false;
+  }
+
+  /* "Attualità · 22 ott": la categoria, se c'è, davanti alla data */
+  function conCategoria(s, testo){
+    return s.categoriaNome ? s.categoriaNome + ' · ' + testo : testo;
+  }
+
   function link(classe, testo, href, nuovaScheda){
     const a = crea('a', classe, testo);
     a.href = href;
@@ -53,16 +79,22 @@
     return a;
   }
 
-  /* i PDF stanno su Google Drive: da qui copertina, lettore e download */
+  /* i PDF stanno su Google Drive: da qui lettore e download.
+     La copertina è l'immagine della categoria (vedi notizie.js);
+     senza categoria, o se l'immagine manca, la prima pagina del PDF */
   function daArticolo(a){
     const id = encodeURIComponent(a.id);
+    const primaPagina = 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1600';
+    const categoria = /^[a-z0-9-]+$/.test(a.categoria || '') ? a.categoria : '';
     return {
       id: a.id,
       titolo: a.titolo,
+      categoriaNome: categoria ? (a.categoriaNome || '') : '',
       data: a.data,
       inArchivioDal: a.inArchivioDal,
       rimossoIl: a.rimossoIl,
-      copertina: 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1600',
+      copertina: categoria ? CARTELLA_COPERTINE + categoria + '.jpg' : primaPagina,
+      primaPagina: primaPagina,
       lettore: 'https://drive.google.com/file/d/' + id + '/preview',
       apri: 'https://drive.google.com/file/d/' + id + '/view',
       scarica: 'https://drive.google.com/uc?export=download&id=' + id
@@ -132,15 +164,15 @@
 
       const copertina = crea('div', 'copertina');
       const foto = crea('img', 'copertina-foto');
-      foto.src = a.copertina;
       foto.alt = '';
       foto.loading = 'lazy';
-      foto.addEventListener('error', function(){ foto.classList.add('nascosto'); });
+      foto.addEventListener('error', function(){ copertinaMancante(foto); });
+      mettiCopertina(foto, a);
       copertina.appendChild(foto);
 
       voce.appendChild(copertina);
       voce.appendChild(crea('p', 'copertina-titolo', a.titolo));
-      voce.appendChild(crea('div', 'edizione-leggi', 'Uscito il ' + dataEstesa(a.data)));
+      voce.appendChild(crea('div', 'edizione-leggi', conCategoria(a, 'Uscito il ' + dataEstesa(a.data))));
       griglia.appendChild(voce);
     });
 
@@ -179,7 +211,7 @@
 
       const testi = crea('span');
       testi.appendChild(crea('b', '', s.titolo));
-      testi.appendChild(crea('small', '', i === 0 ? 'Ultima uscita · ' + dataBreve(s.data) : dataBreve(s.data)));
+      testi.appendChild(crea('small', '', (i === 0 ? 'Ultima uscita · ' : '') + conCategoria(s, dataBreve(s.data))));
       btn.appendChild(testi);
 
       const barra = crea('span', 'scaletta-avanzamento');
@@ -208,7 +240,7 @@
     box.textContent = '';
 
     const testa = crea('div', 'servizio-testa');
-    testa.appendChild(crea('p', 'servizio-rubrica', 'Scaletta del mese · ' + dataEstesa(s.data)));
+    testa.appendChild(crea('p', 'servizio-rubrica', (s.categoriaNome || 'Scaletta del mese') + ' · ' + dataEstesa(s.data)));
     testa.appendChild(crea('h2', '', s.titolo));
     box.appendChild(testa);
 
@@ -242,13 +274,13 @@
 
   function riempiMonitor(i){
     const s = servizi[i];
-    $('tg-foto').classList.remove('nascosto');
-    $('tg-sfondo').classList.remove('nascosto');
-    $('tg-foto').src = s.copertina;
-    $('tg-sfondo').src = s.copertina;
+    /* foto della categoria a tutto schermo; la pagina del PDF resta intera */
+    monitor.classList.toggle('con-categoria', s.copertina !== s.primaPagina);
+    mettiCopertina($('tg-foto'), s);
+    mettiCopertina($('tg-sfondo'), s);
     $('tg-numero').textContent = 'Articolo ' + due(i + 1);
     $('tg-etichetta').textContent = i === 0 ? 'Ultima uscita' : 'In scaletta';
-    $('tg-rubrica').textContent = dataBreve(s.data);
+    $('tg-rubrica').textContent = s.categoriaNome || dataBreve(s.data);
     $('tg-titolo').textContent = s.titolo;
     $('tg-titolo').href = '#servizio';
     $('tg-occhiello').textContent = 'Pubblicato il ' + dataEstesa(s.data);
@@ -329,7 +361,11 @@
   window.addEventListener('resize', allineaScaletta);
 
   ['tg-foto', 'tg-sfondo'].forEach(function(id){
-    $(id).addEventListener('error', function(){ $(id).classList.add('nascosto'); });
+    $(id).addEventListener('error', function(){
+      if(copertinaMancante($(id)) && id === 'tg-foto'){
+        monitor.classList.remove('con-categoria');
+      }
+    });
   });
 
   $('tg-titolo').addEventListener('click', fermaGiro);

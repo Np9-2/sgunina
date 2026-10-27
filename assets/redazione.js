@@ -194,7 +194,7 @@
   let cambio = null;
 
   function messaggioMonitor(titolo){
-    $('tg-etichetta').textContent = 'TG SG';
+    $('tg-etichetta').textContent = 'Redazione SG';
     $('tg-titolo').textContent = titolo;
     $('tg-titolo').removeAttribute('href');
     scatola.classList.add('nascosto');
